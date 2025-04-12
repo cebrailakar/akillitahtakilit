@@ -1,3 +1,4 @@
+import ms from "@sencinion/ms";
 import path from "node:path";
 export default {
   ders_baslama: 8.3,
@@ -8,8 +9,8 @@ export default {
   ikinci_ara: 2,
   oglen_arasi_sure: 60,
   databasePath: path.join("C:/", "ProgramData", "kilit"),
-};
-export const udp = {
-  pass: "123456",
-  port: 98888,
+  password: "159357",
+  update_interval: ms("1 dakika"),
+  duyuru_interval: ms("45 dakika"),
+  pin_timeout: ms("15 dakika"),
 };

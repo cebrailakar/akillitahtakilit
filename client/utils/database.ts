@@ -1,13 +1,14 @@
 import config from "../config.js";
-import path from "node:path";
-import fs from "node:fs";
+import path from "path";
+import fs from "fs";
+import { decodePack, encodePack } from "./pass.js";
 const load = (file: string) =>
-  JSON.parse(new TextDecoder("utf-8").decode(fs.readFileSync(file)));
-// deno-lint-ignore no-explicit-any
+  JSON.parse(decodePack(fs.readFileSync(file, "utf-8"), config.password));
+
 const write = (file: string, data: any) =>
   fs.writeFileSync(
     file,
-    new TextEncoder().encode(JSON.stringify(data, null, 4))
+    encodePack(JSON.stringify(data, null, 4), config.password)
   );
 
 export default class Database {
@@ -22,7 +23,6 @@ export default class Database {
     }
   }
 
-  // deno-lint-ignore no-explicit-any
   set(data: string, value: any) {
     if (!data) throw Error("[err] no data to set");
     if (!value) throw Error("[err] no value to set");
@@ -94,7 +94,6 @@ export default class Database {
     return;
   }
 
-  //<html> forKey: "all-destroy" </html>
   deleteKey(object: string, key: string | number) {
     if (!object) throw Error("[err] No object to key delete");
     if (!key) throw Error("[err] No key to delete from the object");
@@ -111,8 +110,6 @@ export default class Database {
     write(this.file, fileData);
     return;
   }
-
-  //Code obsidestructor ⚔
 
   has(data: string) {
     if (!data) throw Error("[err] No data to has function");
