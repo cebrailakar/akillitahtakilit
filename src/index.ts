@@ -40,10 +40,10 @@ let closeTime = 0;
 let lastNotification = Date.now();
 let currentCode = generateRandomCode();
 let globalTick = 0;
-let currentWindow: BrowserWindow = null;
-let currentTray: Tray = null;
+let currentWindow: BrowserWindow | null = null;
+let currentTray: Tray | null = null;
 let lastTick = Date.now();
-let Interval = null;
+let Interval: NodeJS.Timeout | null = null;
 app.setAppUserModelId("kilit");
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
@@ -52,7 +52,7 @@ if (!gotTheLock) {
   app.on("second-instance", (event) => {
     console.log(":(");
   });
-  app.whenReady().then(async () => {
+  app.whenReady().then(() => {
     tick();
     Interval = setInterval(() => {
       if (Date.now() - lastTick > 1000) {
@@ -103,9 +103,8 @@ ipcMain.on("pin", (event, data) => {
     event.reply("wrongPasscode");
   }
 });
-async function windowInterval() {
+function windowInterval() {
   const now = new Date();
-
   if (closeTime > 0) {
     closeTime--;
     console.log("Kalan süre: " + ms(closeTime * 1000));
@@ -120,7 +119,25 @@ async function windowInterval() {
   if (database.get("derste_acma") || config.derste_acma) {
     const closest = getClosest(now, ders_programi);
 
-    if (closest) {
+    const currentHours = now.getHours();
+    const currentMinutes = now.getMinutes();
+    const currentTimeInMinutes = currentHours * 60 + currentMinutes;
+    const lastEvent = ders_programi.find(
+      (e) => e.index === config.ders.toplam_ders
+    ) as dersProgram;
+
+    const firstEvent = ders_programi.find((e) => e.index === 1) as dersProgram;
+    const [endHours, endMinutes] = lastEvent.end.split(":").map(Number);
+    const endTimeInMinutes = endHours * 60 + endMinutes;
+
+    const [startHours, startMinutes] = firstEvent.start.split(":").map(Number);
+
+    const startTimeInMinutes = startHours * 60 + startMinutes;
+    if (
+      closest &&
+      currentTimeInMinutes <= endTimeInMinutes &&
+      currentTimeInMinutes >= startTimeInMinutes
+    ) {
       if (closest.event.type == "ders") {
         closed = true;
         openScreen();
@@ -143,22 +160,12 @@ async function windowInterval() {
         ac();
       }
     } else {
-      const firstEvent = ders_programi.find((e) => e.index === 1);
-      const lastEvent = ders_programi.find(
-        (e) => e.index === config.ders.toplam_ders
-      );
-
-      if (firstEvent && now < firstEvent.start) {
+      if (firstEvent && currentTimeInMinutes < startTimeInMinutes) {
         closed = false;
         ac();
-      } else if (lastEvent && now > lastEvent.end) {
+      } else if (lastEvent && currentTimeInMinutes > endTimeInMinutes) {
         closed = false;
-
-        if (currentWindow && !currentWindow.isDestroyed()) {
-          currentWindow.close();
-          currentWindow = null;
-        }
-
+        ac();
         return pc_kapa();
       }
     }
@@ -189,18 +196,26 @@ function openScreen() {
   }
 }
 function getClosest(now: Date, events: dersProgram[]): ClosestEvent | null {
-  return events.reduce<ClosestEvent | null>((closest, event) => {
-    const eventStart = event.start;
-    const eventEnd = event.end;
-    const startDiff = Math.abs(now.getTime() - eventStart.getTime());
-    const endDiff = Math.abs(now.getTime() - eventEnd.getTime());
+  // Geçerli zamanı saat:dakika formatında alıyoruz
+  const currentHours = now.getHours();
+  const currentMinutes = now.getMinutes();
+  const currentTimeInMinutes = currentHours * 60 + currentMinutes;
 
+  return events.reduce<ClosestEvent | null>((closest, event) => {
+    const [startHours, startMinutes] = event.start.split(":").map(Number);
+    const [endHours, endMinutes] = event.end.split(":").map(Number);
+
+    const startTimeInMinutes = startHours * 60 + startMinutes;
+    const endTimeInMinutes = endHours * 60 + endMinutes;
+
+    // Farkları dakika cinsinden hesaplıyoruz
+    const startDiff = Math.abs(currentTimeInMinutes - startTimeInMinutes);
+    const endDiff = Math.abs(currentTimeInMinutes - endTimeInMinutes);
     const eventDiff = Math.min(startDiff, endDiff);
 
     if (!closest || eventDiff < Math.min(closest.startDiff, closest.endDiff)) {
       return { event, startDiff, endDiff };
     }
-
     return closest;
   }, null);
 }
@@ -225,7 +240,7 @@ async function qrInterval(force: boolean = false) {
   }
 }
 
-async function checkInterval() {
+function checkInterval() {
   //console.log("checkInterval");
   const yasak = yasaklı_uygulama_bul();
   if (yasak) {
@@ -233,7 +248,7 @@ async function checkInterval() {
     //   showNotification("Sistem", "Yasak uygulama bulundu.");
   }
 }
-async function duyuruInterval(force: boolean = false) {
+function duyuruInterval(force: boolean = false) {
   if (globalTick % Math.floor(config.duyuru_interval / 1000) === 0 || force) {
     console.log("duyuruInterval");
 
@@ -258,19 +273,22 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
-      preload: path.join(__dirname, "../html/preload.js"),
+      //@ts-ignore
+      preload: KILIT_PRELOAD_WEBPACK_ENTRY,
     },
   });
   currentWindow.setSkipTaskbar(true);
-  // currentWindow.webContents.openDevTools();
+  currentWindow.webContents.openDevTools();
   currentWindow.on("leave-full-screen", () => {
     setTimeout(() => {
+      if (!currentWindow) return;
       if (!currentWindow.isFullScreen()) {
         currentWindow.setFullScreen(true);
       }
     }, 300);
   });
-  currentWindow.loadFile(path.join(__dirname, "../html/main.html"));
+  //@ts-ignore
+  currentWindow.loadURL(KILIT_WEBPACK_ENTRY);
   currentWindow.on("close", () => {
     currentWindow = null;
     console.log("Window closed");

@@ -1,31 +1,30 @@
 import express, { Request, Response, NextFunction, Application } from "express";
+import http from "http";
+import { WebSocketServer, WebSocket } from "ws";
 import jwt from "jsonwebtoken";
 import path from "path";
-import config from "./config";
+import config from "../config";
 
-// Define interface for JWT payload
 interface JwtPayload {
   username: string;
 }
-
-// Define interface for authenticated request
 interface AuthenticatedRequest extends Request {
   user?: JwtPayload;
 }
 
 const app: Application = express();
+const server = http.createServer(app);
+const wss = new WebSocketServer({ server });
 const PORT = 3000;
 const SECRET_KEY = config.server.password;
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
-// Middleware to parse JSON and serve static files
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 
-// JWT Authentication Middleware
 const authenticateToken = (
   req: AuthenticatedRequest,
   res: Response,
@@ -48,22 +47,17 @@ const authenticateToken = (
   }
 };
 
-// Home route that renders an EJS template
 app.get("/", (req: Request, res: Response): void => {
-  res.render("index", { title: "Express Example" });
+  res.render("index", { title: "WebSocket Example" });
 });
-
-// Define interface for login request body
 interface LoginRequest {
   username: string;
   password: string;
 }
 
-// Login Route to generate JWT
 app.post("/login", (req: Request, res: Response): void => {
   const { username, password } = req.body as LoginRequest;
 
-  // Dummy user validation
   if (username === "admin" && password === "password") {
     const token = jwt.sign({ username }, SECRET_KEY, { expiresIn: "1h" });
     res.json({ token });
@@ -72,7 +66,6 @@ app.post("/login", (req: Request, res: Response): void => {
   res.status(401).send("Invalid Credentials");
 });
 
-// Protected Route Example
 app.get(
   "/protected",
   authenticateToken,
@@ -81,7 +74,36 @@ app.get(
   }
 );
 
+interface WebSocketMessage {
+  type: string;
+  data: any;
+}
+
+wss.on("connection", (ws: WebSocket) => {
+  ws.on("message", (message: Buffer | string) => {
+    const messageStr = message.toString();
+    console.log("Message received:", messageStr);
+
+    const response: WebSocketMessage = {
+      type: "response",
+      data: "Message received",
+    };
+    ws.send(JSON.stringify(response));
+  });
+
+  ws.on("close", () => {
+    console.log("A user disconnected");
+  });
+
+  // Send a welcome message
+  const welcomeMessage: WebSocketMessage = {
+    type: "info",
+    data: "Welcome to the WebSocket server",
+  };
+  ws.send(JSON.stringify(welcomeMessage));
+});
+
 // Start Server
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });

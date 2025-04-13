@@ -1,7 +1,7 @@
-import config from "../config.js";
+import config from "../config";
 import path from "path";
 import fs from "fs";
-import { decodePack, encodePack } from "./pass.js";
+import { decodePack, encodePack } from "./pass";
 const load = (file: string) =>
   JSON.parse(decodePack(fs.readFileSync(file, "utf-8"), config.password));
 

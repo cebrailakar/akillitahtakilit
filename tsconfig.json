@@ -6,9 +6,24 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "target": "ESNext",
-    "outDir": "dist"
+    "outDir": "./dist",
+    "baseUrl": ".",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "sourceMap": true,
+    "allowJs": true,
+    "checkJs": false,
+    "noImplicitAny": false,
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "typeRoots": ["./node_modules/@types"]
   },
-  "paths": {
-    "@/*": ["./src/*"]
-  }
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": ["node_modules", "dist", ".webpack"]
 }

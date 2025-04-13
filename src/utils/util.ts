@@ -1,5 +1,5 @@
 import { exec, execSync } from "child_process";
-import config from "../config.js";
+import config from "../config";
 import { app } from "electron";
 export function yasaklı_uygulama_bul() {
   const execute = execSync(`tasklist`).toString("utf-8").toLowerCase();
@@ -16,7 +16,7 @@ export function pc_kapa() {
   if (app.isPackaged) {
     execSync("shutdown /s /t 0");
   } else {
-    process.exit();
+    //  process.exit();
   }
 }
 export function ekranAc() {

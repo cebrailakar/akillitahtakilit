@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import config from "../config.js";
+import config from "../config";
 import { Buffer } from "node:buffer";
 let send = false;
 export function encodePack(pack: any, pass: string) {

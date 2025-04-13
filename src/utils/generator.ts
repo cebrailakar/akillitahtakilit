@@ -1,28 +1,19 @@
-function pad(n) {
+function pad(n: number) {
   return n.toString().padStart(2, "0");
 }
 
-function minutesToTime(minutes) {
+function minutesToTime(minutes: number) {
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
   return `${pad(h)}:${pad(m)}`;
 }
 export type dersProgram = {
   type: "ders" | "tenefus" | "oglen_arasi";
-  start: Date;
+  start: string;
   index: number;
-  end: Date;
+  end: string;
 };
-export function toDateFromTimeString(timeStr: string) {
-  const [hours, minutes] = timeStr.split(":").map(Number);
-  const date = new Date();
-  date.setHours(hours);
-  date.setMinutes(minutes);
-  date.setSeconds(0);
-  date.setMilliseconds(0);
-  return date;
-}
-export function generateSchedule(config): dersProgram[] {
+export function generateSchedule(config: any): dersProgram[] {
   const {
     ders_baslama,
     ders_sure,
@@ -32,8 +23,8 @@ export function generateSchedule(config): dersProgram[] {
     oglen_arası,
   } = config;
 
-  const schedule = [];
-  let current = Math.floor(ders_baslama / 100) * 60 + (ders_baslama % 100); // dakikaya çevir
+  const schedule: dersProgram[] = [];
+  let current = Math.floor(ders_baslama / 100) * 60 + (ders_baslama % 100);
 
   for (let i = 1; i <= toplam_ders; i++) {
     // Ders
@@ -47,33 +38,24 @@ export function generateSchedule(config): dersProgram[] {
     });
     current = end;
 
-    // Öğle arası mı?
     if (i === oglen_arası) {
       schedule.push({
         type: "oglen_arasi",
         start: minutesToTime(current),
         end: minutesToTime(current + oglen_arası_sure),
+        index: 0,
       });
       current += oglen_arası_sure;
-    }
-    // Son ders değilse teneffüs
-    else if (i < toplam_ders) {
+    } else if (i < toplam_ders) {
       schedule.push({
         type: "tenefus",
         start: minutesToTime(current),
         end: minutesToTime(current + tenefus),
+        index: 0,
       });
       current += tenefus;
     }
   }
 
-  return schedule
-    .map((item) => {
-      let i = { ...item };
-      i.start = toDateFromTimeString(item.start);
-      i.end = toDateFromTimeString(item.end);
-      return i;
-    })
-    .sort((a, b) => a.start.getTime() - b.start.getTime())
-    .map((item, index) => ({ ...item, index: index + 1 }));
+  return schedule as any;
 }
