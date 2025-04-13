@@ -2,13 +2,14 @@ import ms from "@sencinion/ms";
 import path from "node:path";
 export default {
   yasak_uygulama: ["taskmgr.exe", "perfmon.exe", "msconfig.exe", "regedit.exe"],
-  ders_baslama: 8.3,
-  ders_bitis: 17.3,
-  ders_sure: 4,
-  tenefus_sure: 10,
-  ilk_ara: 4,
-  ikinci_ara: 2,
-  oglen_arasi_sure: 60,
+  ders: {
+    ders_baslama: 820, //8:20
+    ders_sure: 40, //dk
+    tenefus: 10, //dk
+    oglen_arası_sure: 40, //dk
+    toplam_ders: 7,
+    oglen_arası: 4,
+  },
   databasePath: path.join("C:/", "ProgramData", "kilit"),
   password: "159357",
   update_interval: ms("5 dakika"),
