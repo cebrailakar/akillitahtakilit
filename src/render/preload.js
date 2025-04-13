@@ -54,24 +54,45 @@ ipcRenderer.on("duyurular", (event, data) => {
     }
     manageSlider();
 });
+function showToast(options = {}) {
+    const toast = document.getElementById("toast");
+
+    const icon = options.icon || "error";
+    const iconElement = toast.querySelector(".toast-icon");
+    iconElement.className = `toast-icon ${icon}`;
+
+    const titleElement = toast.querySelector(".toast-title");
+    titleElement.textContent = options.title || "Bildirim";
+
+    if (options.colored) {
+        toast.classList.add("colored");
+    } else {
+        toast.classList.remove("colored");
+    }
+
+    toast.classList.add("visible");
+
+    const timer = options.timer || 1500;
+    setTimeout(() => {
+        toast.classList.remove("visible");
+    }, timer);
+
+    const progressBar = toast.querySelector(".toast-progress-bar");
+    progressBar.style.animation = "none";
+    void progressBar.offsetWidth;
+    progressBar.style.animation = `progress ${timer}ms linear forwards`;
+
+    return new Promise(resolve => setTimeout(resolve, timer));
+}
 ipcRenderer.on("wrongPasscode", async (event) => {
-    const Toast = Swal.mixin({
-        toast: true,
-        position: "center",
-        iconColor: "white",
-        customClass: {
-            popup: "colored-toast",
-        },
-        showConfirmButton: false,
-        timer: 1500,
-        timerProgressBar: true,
-    });
     document.getElementById("pin-input").value = pinCode = "";
     const popup = document.getElementById("popup");
     popup.style.display = "none";
-    await Toast.fire({
+    showToast({
         icon: "error",
         title: "Yanlış şifre",
+        timer: 1500,
+        colored: true
     });
 });
 let autoSlideInterval;

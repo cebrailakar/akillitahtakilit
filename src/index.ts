@@ -278,7 +278,7 @@ function createWindow() {
     },
   });
   currentWindow.setSkipTaskbar(true);
-  currentWindow.webContents.openDevTools();
+  // currentWindow.webContents.openDevTools();
   currentWindow.on("leave-full-screen", () => {
     setTimeout(() => {
       if (!currentWindow) return;

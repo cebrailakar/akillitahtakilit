@@ -1,6 +1,6 @@
 {
   "name": "client",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": ".webpack/main",
   "scripts": {
@@ -31,7 +31,6 @@
   "dependencies": {
     "@sencinion/ms": "^0.0.2",
     "qrcode": "^1.5.4",
-    "sweetalert2": "^11.17.2",
     "ws": "^8.18.1"
   },
   "pnpm": {
