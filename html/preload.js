@@ -8,7 +8,7 @@ let slideData = [
     description: "Duyurular sekmesinden ekleyebilirsiniz",
   },
 ];
-
+let qr_time = 0
 document.addEventListener("DOMContentLoaded", function () {
   ipcRenderer.send("init");
   updateTime();
@@ -22,6 +22,14 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 function tick() {
   updateTime();
+  const qr_t = document.getElementById("qr-text");
+  if (qr_time) {
+    qr_t.style.display = "block";
+    qr_time--;
+    qr_t.innerText = `${qr_time}`;
+  } else {
+    qr_t.style.display = "none";
+  }
 }
 
 
@@ -29,6 +37,7 @@ function tick() {
 ipcRenderer.on("qr-code", (event, data) => {
   const qr_code = document.getElementById("qr-code");
   qr_code.src = data.QRData;
+  qr_time = data.nextUpdate / 1000
 });
 ipcRenderer.on("sinif", (event, data) => {
   const qr_code = document.getElementById("current-class");

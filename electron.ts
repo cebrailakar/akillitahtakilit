@@ -110,49 +110,76 @@ ipcMain.on("pin", (event, data) => {
     event.reply("wrongPasscode");
   }
 });
-
 async function windowInterval() {
-  // console.log("Window interval");
-  if (!currentWindow && !closed) createWindow();
-  if (currentWindow?.isDestroyed()) currentWindow = null;
   const now = new Date();
-  if (!closed) restoreWindow();
-  if (currentWindow && !currentWindow.isDestroyed()) currentWindow.close();
+
   if (closeTime > 0) {
     closeTime--;
     console.log("Kalan süre: " + ms(closeTime * 1000));
     closed = true;
-  } else {
+    if (currentWindow && !currentWindow.isDestroyed()) {
+      currentWindow.close();
+      currentWindow = null;
+    }
+    return;
+  }
+
+  if (config.derste_acma) {
     const closest = getClosest(now, ders_programi);
+
     if (closest) {
       if (closest.event.type == "ders") {
         closed = true;
         openScreen();
+        if (currentWindow && !currentWindow.isDestroyed()) {
+          currentWindow.close();
+          currentWindow = null;
+        }
       } else if (closest.event.type == "tenefus") {
         closed = false;
         first = false;
-        openScreen();
+        ac();
+
+        if (currentWindow && !currentWindow.isDestroyed()) {
+          currentWindow.close();
+          currentWindow = null;
+        }
       } else {
-        closeScreen();
         closed = false;
+        closeScreen();
+        ac();
       }
     } else {
       const firstEvent = ders_programi.find((e) => e.index === 1);
       const lastEvent = ders_programi.find(
         (e) => e.index === config.ders.toplam_ders
       );
+
       if (firstEvent && now < firstEvent.start) {
         closed = false;
-      }
-      if (lastEvent && now > lastEvent.end) {
-        closed = true;
+        ac();
+      } else if (lastEvent && now > lastEvent.end) {
+        closed = false;
+
+        if (currentWindow && !currentWindow.isDestroyed()) {
+          currentWindow.close();
+          currentWindow = null;
+        }
+
         return pc_kapa();
       }
     }
-    closeTime = 0;
+  } else {
+    closed = false;
   }
+  closeTime = 0;
+  ac();
 }
-
+function ac() {
+  if (!currentWindow && !closed) createWindow();
+  if (currentWindow?.isDestroyed()) currentWindow = null;
+  if (!closed) restoreWindow();
+}
 let first = false;
 function closeScreen() {
   if (!first) {
@@ -242,6 +269,14 @@ function createWindow() {
     },
   });
   currentWindow.setSkipTaskbar(true);
+  // currentWindow.webContents.openDevTools();
+  currentWindow.on("leave-full-screen", () => {
+    setTimeout(() => {
+      if (!currentWindow.isFullScreen()) {
+        currentWindow.setFullScreen(true);
+      }
+    }, 300);
+  });
   currentWindow.loadFile(path.join(__dirname, "../html/main.html"));
   currentWindow.on("close", () => {
     currentWindow = null;
