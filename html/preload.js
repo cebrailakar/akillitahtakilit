@@ -1,14 +1,31 @@
 const ipcRenderer = require("electron").ipcRenderer;
-
 let pinCode = "";
 let slideData = [
   {
     imgSrc: "",
-    imgAlt: "slm",
-    title: "Boş veri",
-    description: "Boş veri",
+    imgAlt: "",
+    title: "Veri yok",
+    description: "Duyurular sekmesinden ekleyebilirsiniz",
   },
 ];
+
+document.addEventListener("DOMContentLoaded", function () {
+  ipcRenderer.send("init");
+  updateTime();
+  managePopup();
+  manageSlider();
+  const close_app = document.getElementById("close-app");
+  close_app.addEventListener("click", () => {
+    ipcRenderer.send("close-app");
+  });
+  setInterval(tick, 1000);
+});
+function tick() {
+  updateTime();
+}
+
+
+//SIGNAL
 ipcRenderer.on("qr-code", (event, data) => {
   const qr_code = document.getElementById("qr-code");
   qr_code.src = data.QRData;
@@ -24,20 +41,7 @@ ipcRenderer.on("okul_ad", (event, data) => {
 ipcRenderer.on("duyurular", (event, data) => {
   if (data.duyurular.length) slideData = data.duyurular;
   else {
-    slideData = [
-      {
-        imgSrc: "",
-        imgAlt: "slm",
-        title: "Boş veri",
-        description: "Boş veri",
-      },
-      {
-        imgSrc: "",
-        imgAlt: "slm2",
-        title: "Boş veri",
-        description: "Boş veri",
-      },
-    ];
+    slideData = [...slideData, ...slideData];
   }
   manageSlider();
 });
@@ -55,24 +59,13 @@ ipcRenderer.on("wrongPasscode", async (event) => {
   });
   document.getElementById("pin-input").value = pinCode = "";
   const popup = document.getElementById("popup");
-  popup.style.display = "none"
+  popup.style.display = "none";
   await Toast.fire({
     icon: "error",
     title: "Yanlış şifre",
   });
 });
-
-document.addEventListener("DOMContentLoaded", function () {
-  ipcRenderer.send("init");
-  updateTime();
-  setInterval(updateTime, 1000);
-  managePopup();
-  manageSlider();
-  const close_app = document.getElementById("close-app");
-  close_app.addEventListener("click", () => {
-    ipcRenderer.send("close-app");
-  });
-});
+let autoSlideInterval;
 function manageSlider() {
   const sliderWrapper = document.querySelector(".slider-wrapper");
 
@@ -125,7 +118,6 @@ function manageSlider() {
   let currentTranslate = 0;
   let prevTranslate = 0;
   let animationID = 0;
-  let autoSlideInterval;
 
   function updateSlideWidth() {
     slideWidth = slides[0].clientWidth;
@@ -168,7 +160,7 @@ function manageSlider() {
   }
 
   function resetAutoSlide() {
-    clearInterval(autoSlideInterval);
+    if (autoSlideInterval) clearInterval(autoSlideInterval);
     startAutoSlide();
   }
 
@@ -224,7 +216,8 @@ function manageSlider() {
   }
 
   updateSlideWidth();
-  startAutoSlide();
+  resetAutoSlide();
+
 }
 function managePopup() {
   const popup = document.getElementById("popup");
@@ -254,7 +247,7 @@ function managePopup() {
     if (pinCode.length < 6) {
       pinCode += digit;
 
-      if(pinCode.length >= 6)        ipcRenderer.send("pin", pinCode);
+      if (pinCode.length >= 6) ipcRenderer.send("pin", pinCode);
       document.getElementById("pin-input").value = pinCode;
     } else {
       ipcRenderer.send("pin", pinCode);

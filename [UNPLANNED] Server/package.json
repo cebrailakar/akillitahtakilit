@@ -1,0 +1,12 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/electron.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "tsc && electron-forge start",
+    "package": "tsc && electron-forge package",
+    "make": "tsc && electron-forge make"
+  }
+}
