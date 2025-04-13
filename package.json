@@ -7,14 +7,19 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "tsc && electron-forge start",
     "package": "tsc && electron-forge package",
-    "make": "tsc && electron-forge make"
+    "make": "tsc && electron-forge make",
+    "server": "tsc && node dist/server.js"
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.8.0",
     "@electron-forge/plugin-auto-unpack-natives": "^7.8.0",
+    "@types/express": "^5.0.1",
+    "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^22.14.1",
     "@types/qrcode": "^1.5.5",
     "electron": "35.1.5",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
     "typescript": "^5.8.3"
   },
   "dependencies": {

@@ -10,11 +10,16 @@ export default {
     toplam_ders: 7,
     oglen_arası: 4,
   },
-  derste_acma: false,
+  derste_acma: true,
   databasePath: path.join("C:/", "ProgramData", "kilit"),
   password: "159357",
   update_interval: ms("15 saniye"),
   duyuru_interval: ms("45 dakika"),
   pin_timeout: ms("15 dakika"),
   mesaj_interval: ms("1 dakika"),
+  server: {
+    websocketPort: 123445,
+    encrypt: true,
+    password: "777555",
+  },
 };

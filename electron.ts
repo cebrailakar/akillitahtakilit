@@ -1,11 +1,4 @@
-import {
-  app,
-  BrowserWindow,
-  dialog,
-  ipcMain,
-  Notification,
-  Tray,
-} from "electron";
+import { app, BrowserWindow, ipcMain, Notification, Tray } from "electron";
 import path from "path";
 import fs from "fs";
 import config from "./config";
@@ -124,7 +117,7 @@ async function windowInterval() {
     return;
   }
 
-  if (config.derste_acma) {
+  if (database.get("derste_acma") || config.derste_acma) {
     const closest = getClosest(now, ders_programi);
 
     if (closest) {
@@ -237,7 +230,7 @@ async function checkInterval() {
   const yasak = yasaklı_uygulama_bul();
   if (yasak) {
     console.log("Yasak uygulama bulundu.");
-    showNotification("Sistem", "Yasak uygulama bulundu.");
+    //   showNotification("Sistem", "Yasak uygulama bulundu.");
   }
 }
 async function duyuruInterval(force: boolean = false) {
