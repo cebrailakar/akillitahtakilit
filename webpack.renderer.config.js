@@ -1,4 +1,6 @@
+const TerserPlugin = require("terser-webpack-plugin");
 const rules = require("./webpack.rules.js");
+const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 
 // Add CSS rule
 rules.push({
@@ -22,7 +24,26 @@ const rendererConfig = {
       "tls": false,
       "child_process": false
     }
-  }
+  },
+  optimization: {
+    minimize: true,
+    minimizer: [
+      new TerserPlugin({
+        terserOptions: {
+          ecma: 2020,
+          compress: {
+            passes: 2,
+            drop_console: true,
+          },
+          output: {
+            comments: false,
+          },
+        },
+        extractComments: false,
+      }),
+      new CssMinimizerPlugin(),
+    ],
+  },
 };
 
 module.exports = rendererConfig;
