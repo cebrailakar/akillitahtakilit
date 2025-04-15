@@ -6,21 +6,21 @@ export class PacketController {
   constructor(main: Main) {
     this.main = main;
   }
-  getInfo() {
-    const pass = this.main.config.get("packetPassword");
+  getInfo(passw?: any) {
+    const pass = passw ?? this.main.config.get("packetPassword");
     const key = hashAndPad(pass, 32);
     const iv = hashAndPad(pass + pass, 16);
     return { key, iv };
   }
-  encodePack(pack: any) {
-    const info = this.getInfo();
+  encodePack(pack: any, pass?: any) {
+    const info = this.getInfo(pass);
     const cipher = crypto.createCipheriv("aes-256-cbc", info.key, info.iv);
     let encrypted = cipher.update(pack, "utf8", "base64");
     encrypted += cipher.final("base64");
     return encrypted;
   }
-  decodePack(pack: any) {
-    const info = this.getInfo();
+  decodePack(pack: any, pass?: any) {
+    const info = this.getInfo(pass);
 
     const decipher = crypto.createDecipheriv("aes-256-cbc", info.key, info.iv);
     let decrypted = decipher.update(pack, "base64", "utf8");

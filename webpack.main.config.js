@@ -4,6 +4,7 @@ const rules = require("./webpack.rules.js");
 /** @type {import('webpack').Configuration} */
 const mainConfig = {
   entry: "./src/index.ts",
+  devtool: false,
   module: {
     rules,
   },

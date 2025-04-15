@@ -7,3 +7,5 @@
 - Otomatik güncelleştirme
 
 - Yasaklı uygulama yönetimi
+
+- Usb kilit açmak

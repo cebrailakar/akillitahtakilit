@@ -6,7 +6,7 @@
     "skipLibCheck": true,
     "noImplicitAny": true,
     "esModuleInterop": true,
-    "sourceMap": true,
+    "sourceMap": false,
     "baseUrl": ".",
     "outDir": "dist",
     "moduleResolution": "node",

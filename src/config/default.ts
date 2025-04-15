@@ -1,10 +1,11 @@
 import ms from "@sencinion/ms/dist/ms";
+import path from "path";
 
 export const defaultConfig = {
   qrChangeTime: ms("60 saniye"),
   packetPassword: "777777",
   automation: true,
-  qr_openTime: ms("1 dakika"),
+  qr_openTime: ms("15 dakika"),
   yasaklı_uygulamalar: [""],
   school_name: "Güzelyurt Anadolu İmam Hatip Lisesi",
   class_number: "10/A",
@@ -137,4 +138,5 @@ export const defaultConfig = {
 };
 export const globalConfig = {
   systemPassword: "159357",
+  databasePath: path.join(process.env.ProgramData, "kilit"),
 };

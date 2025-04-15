@@ -35,6 +35,10 @@ export class WindowController {
   onInit(events: Electron.IpcMainEvent, data: any[]) {
     console.log("Init");
     this.main.other.qr.createInterval();
+    if (this.main.config.isFirst()) {
+      this.sendMessage("first_open", "");
+    }
+
     this.sendInformation();
   }
   sendInformation() {
